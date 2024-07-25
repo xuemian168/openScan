@@ -1,16 +1,10 @@
-# 一个毕设的扫描器项目
+Features:
+Internal Network Asset Discovery
+Web Defacement Detection
+Web Keyword Detection
+Internal Network Port Scanning and Statistics
+Basic Vulnerability Testing
+Weak Password Check for SSH and RDP
+The framework uses Django without front-end and back-end separation, and Bootstrap 5 is used as the main front-end UI framework.
 
-#### 功能：
-
-1. 内网资产发现
-2. 网页篡改检测
-3. 网页关键字检测
-4. 内网端口探测并统计
-5. 基础漏洞测试
-6. SSH与RDP的弱口令检查
-
-
-
-框架采用Django未使用Vue前后端分离，采用Bootstrap5为主要是前端UI框架
-
-数据库我自己用的MySQL 建议将SQL和服务部署在一台机器上避免数据传输
+I use MySQL for the database. It is recommended to deploy the SQL and service on the same machine to avoid data transmission issues.
