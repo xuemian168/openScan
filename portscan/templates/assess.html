@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>资产详情 - 中心</title>
+    <!-- 引入Bootstrap 5的CSS文件 -->
+    <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="{% static '/js/bootstrap.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<style>
+    @font-face {
+        /* 导入金山云字体 */
+        font-family: 'KingCloud';
+        src: url('{% static '/font/Kingsoft_Cloud_Font.ttf' %}') format('truetype');
+    }
+
+    .panel {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img src="{% static '/img/logo.png' %}" width="40" height="32">
+            <h3 class="ms-2" style="color: #0b5ed7;font-family: 'KingCloud',sans-serif; margin: 0;">骑安欣天擎</h3>
+        </a>
+
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/dash/" class="nav-link px-2 link-dark">主页</a></li>
+            <li><a href="/dash/iplist" class="nav-link px-2 link-dark">资产管理</a></li>
+            <li><a href="/dash/scheduleList" class="nav-link px-2 link-dark">任务中心</a></li>
+            <li><a href="/dash/assess" class="nav-link px-2 link-secondary active">资产细则</a></li>
+            <li><a href="/dash/falsify" class="nav-link px-2 link-dark">网页防篡改</a></li>
+            <li><a href="/api/rev_conf" class="nav-link px-2 link-dark">蜜罐配置</a></li>
+            <li><a href="/dash/about" class="nav-link px-2 link-dark">设置</a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            <button disabled class="btn btn-outline-primary"><i class="fa-solid fa-user"></i> {{ user }}</button>
+            <a href="/logout.do">
+                <button type="button" class="btn btn-primary"><i class="fa-solid fa-right-from-bracket"></i> 注销
+                </button>
+            </a>
+        </div>
+    </header>
+</div>
+<div class="container mt-5">
+    <div class="panel">
+        <div class="container">
+            <div class="card">
+                <h5 class="card-header">快速检索</h5>
+                <div class="card-body">
+                    <form method="post" action="assess">
+                        <div class="row">
+                            <div class="col-md-4">
+                                {% csrf_token %}
+                                <input id="keyword" type="text" name="keyword" class="form-control"
+                                       placeholder="关键字">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-outline-primary" value=""><i
+                                        class="fa-solid fa-magnifying-glass"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="container">
+            <div class="card">
+                <h4 class="card-header">资产详情
+                    {% if keyword %}
+                        <span class="badge bg-light" style="color: #0a53be"> {{ keyword }} <a href="/dash/assess"><i
+                                class="fa-solid fa-xmark"></i></a></span>
+                    {% endif %}
+                </h4>
+                <div class="card-body">
+                    <div class="table-container table-responsive">
+                        <table class="table table-bordered table-hover" style="text-align: center">
+                            <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>MAC地址</th>
+                                <th>防火墙状态</th>
+                                <th>网卡数量</th>
+                                <th>OS类型</th>
+                                <th>OS版本</th>
+                                <th>CPU型号</th>
+                                <th>CPU核心数</th>
+                                <th>网卡型号</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for assess in assess_list %}
+                                <tr>
+
+                                    <td>{{ ips.pop }}</td>
+                                    <td>{{ assess.mac.upper }}</td>
+                                    <td>
+                                        {% if  assess.firewall == 1 %}
+                                            <i class="fa-solid fa-shield"></i>
+                                        {% elif assess.firewall == 0 %}
+                                            <i class="fa-solid fa-virus fa-beat"></i>
+                                        {% endif %}
+                                    </td>
+                                    {% if assess.nic_count is not 1 %}
+                                        <td style="background: yellow">{{ assess.nic_count }}</td>
+                                    {% else %}
+                                        <td>{{ assess.nic_count }}</td>
+                                    {% endif %}
+
+                                    <td>
+                                        {% if assess.os_type == 0 %}
+                                            <i class="fa-brands fa-linux"></i>
+                                        {% else %}
+                                            <i class="fa-brands fa-windows"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ assess.os_release }}</td>
+                                    <td>{{ assess.cpu_model }}</td>
+                                    <td>{{ assess.cpu_count }}</td>
+                                    <td>{{ assess.model }}</td>
+                                    <td>预留</td>
+
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

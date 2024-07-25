@@ -1,0 +1,95 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tcping</title>
+    <link rel="stylesheet" href="{% static '/css/bootstrap.css' %}">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <style>
+        /* 自定义样式，用于美化输入框的外观 */
+        .center-content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            width: 300px; /* 自定义宽度，根据需要调整 */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 可选：为输入框添加一些额外的样式 */
+        .form-label {
+            font-weight: bold;
+        }
+
+        /* 添加其他样式根据需要 */
+    </style>
+</head>
+<body>
+<div class="center-content">
+    <div class="card">
+        <form>
+            {% csrf_token %}
+            <label class="form-label" for="ip">输入IP</label>
+            <input type="text" name="ip" id="ip" class="form-control mb-3">
+            <label class="form-label" for="port">端口</label>
+            <input type="text" name="port" id="port" class="form-control mb-3">
+            <button type="submit" class="btn btn-outline-primary" id="tcpingButton">TCPING</button>
+        </form>
+    </div>
+</div>
+</body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 获取按钮元素
+        var tcpingButton = document.getElementById("tcpingButton");
+
+        // 添加点击事件监听器
+        tcpingButton.addEventListener("click", function (event) {
+            // 阻止表单默认的提交行为
+            event.preventDefault();
+
+            // 获取输入框中的IP和端口
+            var ip = document.getElementById("ip").value;
+            var port = document.getElementById("port").value;
+
+            // 构建POST请求的数据
+            var data = {
+                ip: ip,
+                port: port
+            };
+
+            // 发起POST请求到后台
+            fetch("/api/recheck.do", {
+                method: "post",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            })
+                .then(function (response) {
+                    return response.json(); // 解析响应为JSON
+                })
+                .then(function (result) {
+                    // 处理后台响应
+                    if (result.success) {
+                        alert("成功：端口开放");
+                    } else {
+                        alert("失败：端口关闭");
+                    }
+                })
+                .catch(function (error) {
+                    alert("错误：" + error.message);
+                });
+        });
+    });
+</script>
+
+</html>

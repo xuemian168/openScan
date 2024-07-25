@@ -1,0 +1,210 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>控制器</title>
+    <!-- 引入Bootstrap 5的CSS文件 -->
+    <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="{% static '/js/bootstrap.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<style>
+    @font-face {
+        /* 导入金山云字体 */
+        font-family: 'KingCloud';
+        src: url('{% static '/font/Kingsoft_Cloud_Font.ttf' %}') format('truetype');
+    }
+
+    .list-group-item.active a {
+        color: #ffffff; /* 更改文本颜色为白色 */
+    }
+
+    a {
+        text-decoration: none;
+    }
+</style>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <a href="/dash/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img src="{% static '/img/logo.png' %}" width="40" height="32">
+            <h3 class="ms-2" style="color: #0b5ed7;font-family: 'KingCloud',sans-serif; margin: 0;">骑安欣天擎</h3>
+        </a>
+
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/dash/" class="nav-link px-2 link-secondary">主页</a></li>
+            <li><a href="/dash/iplist" class="nav-link px-2 link-dark active">资产管理</a></li>
+            <li><a href="/dash/scheduleList" class="nav-link px-2 link-dark">任务中心</a></li>
+            <li><a href="/dash/assess" class="nav-link px-2 link-dark">资产细则</a></li>
+            <li><a href="/dash/falsify" class="nav-link px-2 link-dark">网页防篡改</a></li>
+            <li><a href="/api/rev_conf" class="nav-link px-2 link-dark">蜜罐配置</a></li>
+            <li><a href="/dash/about" class="nav-link px-2 link-dark">设置</a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            {% if  activity == 1 %}
+                <a href="/dash/about" class="btn btn-outline-light text-dark"><i class="fa-solid fa-star"></i>
+                    已激活</a>
+            {% elif activity == 0 %}
+                <a href="/dash/about">
+                    <button disabled class="btn btn-outline-light text-dark"><i
+                            class="fa-solid fa-circle-exclamation fa-beat"></i> 未激活
+                    </button>
+                </a>
+            {% endif %}
+            <button disabled class="btn btn-outline-primary"><i class="fa-solid fa-user"></i> {{ user }}</button>
+            <a href="/logout.do">
+                <button type="button" class="btn btn-primary"><i class="fa-solid fa-right-from-bracket"></i> 注销
+                </button>
+            </a>
+        </div>
+    </header>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <!-- 左侧导航栏 -->
+        <div class="col-md-3">
+            <br>
+            <ul class="list-group">
+                <li class="list-group-item active text-white"><a href="/dash"><i class="fa-solid fa-indent"></i>  首页</a></li>
+                <li class="list-group-item"><a href="/tool/view"><i class="fa-solid fa-toolbox"></i> 运维工具</a></li>
+                <li class="list-group-item"><a href="/dash/assess"><i class="fa-solid fa-list-check"></i> 资产管理</a></li>
+                <li class="list-group-item"><a href="https://www.xuemian168.com/"><i class="fa-regular fa-copyright"></i> XueMian</a></li>
+            </ul>
+        </div>
+        <!-- 右侧内容区域 -->
+        <div class="col-md-9">
+            <!-- 标题栏 -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+{#                <span>当前身份: {{ user }}</span>#}
+{#                <!-- 添加其他右上角内容 -->#}
+            </div>
+
+            <!-- 系统运行数据可视化 -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <!-- 占用率饼图1 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fa-solid fa-microchip"></i> CPU 使用率</h5>
+                            <canvas id="cpuChart" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <!-- 占用率饼图2 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title"><i class="fa-solid fa-memory"></i> 内存 使用率</h5>
+                            <canvas id="memoryChart" width="400" height="400"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-check"></i> 在线主机</div>
+                        <div class="card-body"><span id="onlineHosts" class="display-4">加载中...</span>台</div>
+
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-stop"></i> 离线主机</div>
+                        <div class="card-body"><span id="offlineHosts" class="display-4">加载中...</span>台</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-danger">
+                        <div class="card-header"><i class="fa-solid fa-triangle-exclamation"></i> 高危端口</div>
+                        <div class="card-body"><span id="attentionPorts" class="display-4">加载中...</span>个</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header"><i class="fa-solid fa-ethernet"></i> 开放端口</div>
+                        <div class="card-body"><span id="openPorts" class="display-4">加载中...</span>个</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script type="application/javascript">
+            // 创建饼图函数
+            function createPieChart(elementId, label, data) {
+                var ctx = document.getElementById(elementId).getContext('2d');
+                return new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: [label, '空闲'],
+                        datasets: [{
+                            data: [data, 100 - data],
+                            backgroundColor: ['#007bff', '#f3f3f3']
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 更新饼图数据
+            function updatePieChart(chart, data) {
+                chart.data.datasets[0].data = [data, 100 - data];
+                chart.update();
+            }
+
+            // 发起请求获取服务器运行数据
+            function fetchDataAndRefresh() {
+                $.ajax({
+                    url: '/api/get_system_metrics.do',
+                    method: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        // 更新前端页面上的数据
+                        $('#attentionPorts').text(data.attention_ports);
+                        $('#onlineHosts').text(data.online_hosts);
+                        $('#offlineHosts').text(data.offline_hosts);
+                        $('#openPorts').text(data.open_ports);
+
+                        // 更新饼图数据
+                        updatePieChart(cpuChart, data.cpu_percent);
+                        updatePieChart(memoryChart, data.memory_percent);
+                    },
+                    error: function (error) {
+                        console.error('获取服务器运行数据失败:', error);
+                    }
+                });
+            }
+
+            // 初始化饼图
+            var cpuChart = createPieChart('cpuChart', 'CPU', 0);
+            var memoryChart = createPieChart('memoryChart', '内存', 0);
+
+            // 初始获取数据并设置定时刷新
+            fetchDataAndRefresh();
+            var refreshInterval = setInterval(fetchDataAndRefresh, 2000);
+
+            // 刷新按钮点击事件
+            $('#refreshButton').on('click', function () {
+                fetchDataAndRefresh();
+            });
+
+            // 停止定时刷新
+            $('#stopRefreshButton').on('click', function () {
+                clearInterval(refreshInterval);
+            });
+        </script>
+    </div>
+</div>
+</body>
+</html>

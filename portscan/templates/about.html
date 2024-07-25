@@ -1,0 +1,272 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>关于天擎 - 骑安欣天擎</title>
+    <link rel="stylesheet" href="{% static '/css/bootstrap.css' %}">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static '/js/bootstrap.js' %}"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<style>
+    @font-face {
+        /* 导入金山云字体 */
+        font-family: 'KingCloud';
+        src: url('{% static '/font/Kingsoft_Cloud_Font.ttf' %}') format('truetype');
+    }
+</style>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img src="{% static '/img/logo.png' %}" width="40" height="32">
+            <h3 class="ms-2" style="color: #0b5ed7;font-family: 'KingCloud',sans-serif; margin: 0;">骑安欣天擎</h3>
+        </a>
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/dash/" class="nav-link px-2 link-dark">主页</a></li>
+            <li><a href="/dash/iplist" class="nav-link px-2 link-dark">资产管理</a></li>
+            <li><a href="/dash/scheduleList" class="nav-link px-2 link-dark">任务中心</a></li>
+            <li><a href="/dash/assess" class="nav-link px-2 link-dark">资产细则</a></li>
+            <li><a href="/dash/falsify" class="nav-link px-2 link-dark">网页防篡改</a></li>
+            <li><a href="/api/rev_conf" class="nav-link px-2 link-dark">蜜罐配置</a></li>
+            <li><a href="/dash/about" class="nav-link px-2 link-secondary active"><i class="fa-solid fa-gear fa-spin"></i></a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            <button disabled class="btn btn-outline-primary"><i class="fa-solid fa-user"></i> {{ user }}</button>
+            <a href="/logout.do">
+                <button type="button" class="btn btn-primary"><i class="fa-solid fa-right-from-bracket"></i> 注销
+                </button>
+            </a>
+        </div>
+    </header>
+</div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">基础漏洞扫描</h2>
+                    <p class="card-text">
+                        通过系统的漏洞扫描功能，您可以快速发现和修复系统中的安全漏洞，提高网络的安全性。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">端口探测</h2>
+                    <p class="card-text">
+                        使用端口探测工具，您可以检查网络中的开放端口，确保只有必要的端口是开放的，减少潜在的风险。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">主机探测</h2>
+                    <p class="card-text">
+                        主机探测功能允许您快速发现和识别网络中的设备和主机，有助于监控和管理网络拓扑。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第二行 -->
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">禁止注册</h2>
+                    <p class="card-text">
+                        {% if registrable %}
+                            <button class="btn btn-success" name="disable_register" onclick="updateRegistrable(false)">
+                                <i class="fa fa-check-circle"></i> 禁用注册
+                            </button>
+                        {% else %}
+                            <button class="btn btn-danger" name="enable_register" onclick="updateRegistrable(true)">
+                                <i class="fa fa-times-circle"></i> 开启注册
+                            </button>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">主机客户端</h2>
+                    <p class="card-text">
+                        <a href="{% static '/plugins/collect_linux_info2.py' %}">
+                            <button class="btn btn-outline-primary"><i class="fa-brands fa-linux"></i> 下载Linux客户端
+                            </button>
+                        </a>
+                        <br/><br/>
+                        <a href="{% static '/plugins/collect_windows_info.exe' %}">
+                            <button class="btn btn-outline-primary"><i class="fa-brands fa-windows"></i> 下载Win客户端
+                            </button>
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">激活信息</h2>
+                    <div class="card-text">
+                        {% for foo in license %}
+                            {% if foo.status == 1 %}
+                                <form id="activation-form" action="/api/active.do" method="post">
+                                    {% csrf_token %}
+                                    密钥：
+                                    <input id="license" name="license" type="text" class="form-control"
+                                           placeholder="请输入License" disabled value="{{ foo.license_key }}"></input>
+                                    有效期：<input id="expire" name="expire" type="text" class="form-control"
+                                                  placeholder="请输入过期时间，例如2023-09-12"
+                                                  value="{{ foo.expire_time }}" readonly></input>
+                                    <br/>
+                                </form>
+                            {% elif foo.status == 0 %}
+                                <form id="activation-form" method="post">
+                                    {% csrf_token %}
+                                    <input id="license" name="license" type="text" class="form-control"
+                                           placeholder="请输入License"></input>
+                                    <input id="mac" name="mac" type="text" class="form-control"
+                                           placeholder="请输入MAC地址"></input>
+                                    <input id="expire" name="expire" type="text" class="form-control"
+                                           placeholder="请输入过期时间，例如2023-09-12"></input>
+                                    <br/>
+                                    <input type="submit" class="btn btn-outline-primary" value="激活">
+                                </form>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 第三行 -->
+    <div class="row">
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">钉钉API配置</h2>
+                    <div class="card-text">
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="text" class="form-control" id="ding_secret" name="ding_webhook"
+                                   value="{{ ding_secret }}">
+                            <input type="text" class="form-control" id="ding_webhook" name="ding_webhook"
+                                   value="{{ ding_webhook }}">
+                            <button type="submit" class="btn btn-outline-info">提交更改</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">端口探测</h2>
+                    <p class="card-text">
+                        使用端口探测工具，您可以检查网络中的开放端口，确保只有必要的端口是开放的，减少潜在的风险。</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">主机探测</h2>
+                    <p class="card-text">
+                        主机探测功能允许您快速发现和识别网络中的设备和主机，有助于监控和管理网络拓扑。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="application/javascript">
+    function updateRegistrable(enable) {
+        // 发送 POST 请求到 /api/registrable.do
+        fetch('/api/registrable.do', {
+            method: 'POST',
+            body: JSON.stringify({enable: enable}),
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken') // 添加 CSRF 令牌
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    // 刷新页面
+                    window.location.reload();
+                } else {
+                    console.error('请求失败');
+                }
+            })
+            .catch(error => {
+                console.error('请求错误:', error);
+            });
+    }
+
+
+    //激活模块
+    document.getElementById("activation-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // 阻止默认的表单提交行为
+
+        // 获取表单数据
+        var license = document.getElementById("license").value;
+        var mac = document.getElementById("mac").value;
+        var expire = document.getElementById("expire").value;
+
+        // 创建一个 FormData 对象，将表单数据添加到其中
+        var formData = new FormData();
+        formData.append("license", license);
+        formData.append("mac", mac);
+        formData.append("expire", expire);
+
+        // 发送 POST 请求到 /api/active.do
+        fetch("/api/active.do", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": getCookie("csrftoken") // 获取 CSRF Token
+            }
+        })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("请求失败");
+                }
+            })
+            .then(function (data) {
+                // 在弹窗中显示返回的 JSON 数据
+                var message = data.message;
+                alert(message);
+                // 刷新页面
+                location.reload();
+            })
+            .catch(function (error) {
+                console.error("发生错误:", error);
+            });
+    });
+
+    // 获取 CSRF Token 的函数
+    function getCookie(name) {
+        var value = "; " + document.cookie;
+        var parts = value.split("; " + name + "=");
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+</script>
+</html>

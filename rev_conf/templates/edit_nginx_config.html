@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>蜜罐代理配置中心</title>
+    <!-- 引入Bootstrap 5的CSS文件 -->
+    <link href="{% static '/css/bootstrap.css' %}" rel="stylesheet">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+          integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
+    <script src="{% static '/js/bootstrap.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<style>
+    @font-face {
+        /* 导入金山云字体 */
+        font-family: 'KingCloud';
+        src: url('{% static '/font/Kingsoft_Cloud_Font.ttf' %}') format('truetype');
+    }
+
+    .panel {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+</style>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img src="{% static '/img/logo.png' %}" width="40" height="32">
+            <h3 class="ms-2" style="color: #0b5ed7;font-family: 'KingCloud',sans-serif; margin: 0;">骑安欣天擎</h3>
+        </a>
+
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/dash/" class="nav-link px-2 link-dark">主页</a></li>
+            <li><a href="/dash/iplist" class="nav-link px-2 link-dark">资产管理</a></li>
+            <li><a href="/dash/scheduleList" class="nav-link px-2 link-dark">任务中心</a></li>
+            <li><a href="/dash/assess" class="nav-link px-2 link-dark">资产细则</a></li>
+            <li><a href="/dash/falsify" class="nav-link px-2 link-dark">网页防篡改</a></li>
+            <li><a href="/api/rev_conf" class="nav-link px-2 link-secondary active">蜜罐配置</a></li>
+            <li><a href="/dash/about" class="nav-link px-2 link-dark">设置</a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            <button disabled class="btn btn-outline-primary"><i class="fa-solid fa-user"></i> {{ user }}</button>
+            <a href="/logout.do">
+                <button type="button" class="btn btn-primary"><i class="fa-solid fa-right-from-bracket"></i> 注销
+                </button>
+            </a>
+        </div>
+    </header>
+</div>
+<div class="container mt-5">
+    <div class="panel">
+        <div class="container">
+            <div class="card">
+                <div class="card-header">
+                    <h3>编辑蜜罐代理配置</h3>
+                </div>
+                <div class="card-body">
+
+                    <h5>当前蜜罐列表</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                        <tr>
+                            <th>端口</th>
+                            <th>蜜罐地址</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for config in proxy_config %}
+                            <tr>
+                                <td>{{ config.port }}</td>
+                                <td>{{ config.proxy_pass }}</td>
+                                <td>
+                                    <a href="?del={{ config.port }}" class="btn btn-danger">删除</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="container">
+                        <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#configCollapse">
+                            展开配置原文
+                        </button>
+                        <div id="configCollapse" class="collapse">
+                            <pre>{{ current_config|safe }}</pre>
+                        </div>
+                    </div>
+
+                    <h2>添加新蜜罐：</h2>
+                    <form method="post" class="was-validated">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="port" class="form-label">端口:</label>
+                            <input type="number" id="port" name="port" required class="form-control"
+                                   oninput="maxLengthCheck(this)" maxlength="5"
+                                   min="100" max="65534" step="1" pattern="\d+" title="请输入100到65534之间的整数">
+                            <div class="invalid-feedback">请输入100到65534之间的整数</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="proxy_pass" class="form-label">目的地址:</label>
+                            <input type="url" id="proxy_pass" name="proxy_pass" required class="form-control"
+                                   pattern="https?://.+">
+                            <div class="invalid-feedback">请输入有效的 HTTP 或 HTTPS 地址</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">添加</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleConfig() {
+        var configElement = document.getElementById('config');
+        if (configElement.style.display === 'none') {
+            configElement.style.display = 'block';
+        } else {
+            configElement.style.display = 'none';
+        }
+    }
+
+    function maxLengthCheck(object) {
+        if (object.value.length > object.maxLength) {
+            object.value = object.value.slice(0, object.maxLength);
+        }
+    }
+
+</script>
+</body>
+</html>

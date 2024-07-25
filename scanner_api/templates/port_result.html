@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan Results</title>
+</head>
+<body>
+    <ul>
+        {% for result in scan_results %}
+            <li>{{ result.ip_address }}:{{ result.open_port }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -1,0 +1,360 @@
+{% load tz %} {# 导入时区标签库 #}
+
+{{ value_datetime|timezone:"Asia/Shanghai" }}
+{{ time|date:"Y年m月d日 H:i:s" }} {# 日期时间格式化，可以根据需求自定义格式 #}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>资产列表 - 骑安欣天擎</title>
+    <link rel="stylesheet" href="{% static '/css/bootstrap.css' %}">
+    <link rel="icon" href="{% static '/img/logo.ico' %}" type="image/x-icon">
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static '/js/bootstrap.js' %}"></script>
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.4.2/css/all.css" rel="stylesheet">
+</head>
+<style>
+    @font-face {
+        /* 导入金山云字体 */
+        font-family: 'KingCloud';
+        src: url('{% static '/font/Kingsoft_Cloud_Font.ttf' %}') format('truetype');
+    }
+
+    .center-content {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        margin: 3%;
+    }
+
+    .panel {
+        max-width: 80%;
+        margin: 0 auto;
+        padding: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+
+    .table-container {
+        margin-top: 20px;
+        white-space: normal;
+    }
+
+    .btn-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    /* 限制文本最大字符数并换行 */
+    .truncate-text {
+        max-width: 250px; /* 你可以根据需要调整最大宽度 */
+        white-space: nowrap;
+        overflow: scroll;
+        text-overflow: unset;
+    }
+
+    /* 返回顶部按钮的样式 */
+    #scrollTopButton {
+        display: none; /* 默认隐藏按钮 */
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 99;
+        background-color: #007bff; /* 按钮背景颜色 */
+        color: #fff; /* 文本颜色 */
+        border: none;
+        border-radius: 50%;
+        width: 50px; /* 固定宽度 */
+        height: 50px; /* 固定高度，使其成为正方形 */
+        padding: 0;
+        cursor: pointer;
+        font-size: 24px; /* 按钮文本大小 */
+        transition: background-color 0.3s ease; /* 过渡效果 */
+    }
+
+    /* 鼠标悬停时改变按钮颜色 */
+    #scrollTopButton:hover {
+        background-color: #0056b3; /* 悬停时的背景颜色 */
+    }
+</style>
+<body>
+<div class="container">
+    <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-4 border-bottom">
+        <a href="/" class="d-flex align-items-center col-md-3 mb-2 mb-md-0 text-dark text-decoration-none">
+            <img src="{% static '/img/logo.png' %}" width="40" height="32">
+            <h3 class="ms-2" style="color: #0b5ed7;font-family: 'KingCloud',sans-serif; margin: 0;">骑安欣天擎</h3>
+        </a>
+
+
+        <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+            <li><a href="/dash/" class="nav-link px-2 link-dark">主页</a></li>
+            <li><a href="/dash/iplist" class="nav-link px-2 link-dark">资产管理</a></li>
+            <li><a href="/dash/scheduleList" class="nav-link px-2 link-dark">任务中心</a></li>
+            <li><a href="/dash/assess" class="nav-link px-2 link-dark">资产细则</a></li>
+            <li><a href="/dash/falsify" class="nav-link px-2 link-secondary active">网页防篡改</a></li>
+            <li><a href="/api/rev_conf" class="nav-link px-2 link-dark">蜜罐配置</a></li>
+            <li><a href="/dash/about" class="nav-link px-2 link-dark">设置</a></li>
+        </ul>
+
+        <div class="col-md-3 text-end">
+            <button disabled class="btn btn-outline-primary"><i class="fa-solid fa-user"></i> {{ user }}</button>
+            <a href="/logout.do">
+                <button type="button" class="btn btn-primary"><i class="fa-solid fa-right-from-bracket"></i> 注销
+                </button>
+            </a>
+        </div>
+    </header>
+</div>
+
+{#导航栏结束#}
+
+<div class="center-content">
+    <div class="panel">
+        <div class="header" style="font-family: sans-serif">资产列表</div>
+        <div class="btn-container">
+            <button type="button" class="btn btn-outline-primary" name="flush_online" id="flushButton"><i
+                    class="fa-solid fa-arrows-rotate"></i> 刷新
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+                <i class="fa-solid fa-plus"></i> 添加网站
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#keywords">
+                <i class="fa-solid fa-list"></i> 查看关键词
+            </button>
+        </div>
+
+        <!-- 模态框 -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <form method="post" action="/dash/falsify" class="was-validated">
+                        <!-- 模态框头部 -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">添加网站资产</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- 模态框内容 -->
+                        <div class="modal-body">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="newweb" class="form-label">URL：</label>
+                                <input class="form-control" id="newweb" type="text" name="url"
+                                       placeholder="完整URL，如http://www.ict.run/"
+                                       title="请输入有效的URL地址">
+                                <div class="valid-feedback">验证成功！</div>
+                                <div class="invalid-feedback">请输入有效地址！</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="owner" class="form-label">责任人：</label>
+                                <input class="form-control" id="owner" type="text" name="owner" placeholder="责任人"
+                                       required>
+                                <div class="valid-feedback">验证成功！</div>
+                                <div class="invalid-feedback">请输入有效责任人！</div>
+                            </div>
+                        </div>
+
+                        <!-- 模态框底部 -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                            <button type="submit" class="btn btn-primary">添加</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 模态框 -->
+        <div class="modal" id="keywords">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <!-- 模态框头部 -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">违禁词列表</h4>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <!-- 模态框内容 -->
+                    <div class="modal-body">
+                        <h6>上传关键词CSV文件</h6>
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            {{ form.csv_file }}
+                            <button type="submit" class="btn btn-outline-primary">上传文件</button>
+                        </form>
+                        <table class="table table-bordered table-hover table-responsive">
+                            <tr>
+                                <th>编号</th>
+                                <th>关键词</th>
+                                <th>添加时间</th>
+                            </tr>
+                            {% for keyword in keywords %}
+                                <tr>
+                                    <td>{{ keyword.id }}</td>
+                                    <td>{{ keyword.value }}</td>
+                                    <td>{{ keyword.time }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+
+                    <!-- 模态框底部 -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">关闭</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container container-fluid" id="#section1">
+            <table class="table table-bordered table-hover">
+                <thead>
+                <tr>
+                    <th>网址</th>
+                    <th>标题</th>
+                    <th>责任人</th>
+                    <th>状态码</th>
+                    <th>字长</th>
+                    <th>检查结果</th>
+                    <th>触发关键字</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                {% for web in result %}
+                    <tr>
+                        <td>
+                            <div class="truncate-text">{{ web.url }}</div>
+                        </td>
+                        <td>{{ web.title }}</td>
+                        <td>{{ web.owner }}</td>
+                        <td>{{ web.respond_code }}</td>
+                        <td>{{ web.bef_long }} : {{ web.aft_long }}</td>
+                        <td>
+                            {% if web.status == 2 %}
+                                疑似篡改
+                            {% elif web.status == 1 %}
+                                正常
+                            {% endif %}
+                        </td>
+                        <td>{{ web.keyword }}</td>
+                        <td>
+                            <!-- 删除确认按钮 -->
+                            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                    data-bs-target="#delete_confirm{{ web.id }}">
+                                <i class="fa-regular fa-trash-can"></i> 删除
+                            </button>
+
+                            <!-- 删除确认模态框 -->
+                            <div class="modal fade" id="delete_confirm{{ web.id }}" tabindex="-1" role="dialog"
+                                 aria-labelledby="deleteModalLabel{{ web.id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content">
+                                        <form method="post" action="/dash/delWeb.do">
+                                            <!-- 模态框头部 -->
+                                            <div class="modal-header">
+                                                <h4 class="modal-title">删除确认</h4>
+                                                <button type="button" class="btn-close"
+                                                        data-bs-dismiss="modal"></button>
+                                            </div>
+
+                                            <!-- 模态框内容 -->
+                                            <div class="modal-body">
+                                                确认删除监控： {{ web.url }}？
+                                            </div>
+
+                                            <!-- 模态框底部 -->
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-outline-info"
+                                                        data-bs-dismiss="modal">关闭
+                                                </button>
+                                                <a href="/dash/delWeb.do?id={{ web.id }}">
+                                                    <button type="button" class="btn btn-danger">确认</button>
+                                                </a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 删除确认结束 -->
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+<script type="application/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+        // 获取刷新按钮元素
+        var flushButton = document.getElementById("flushButton");
+
+        // 添加点击事件监听器
+        flushButton.addEventListener("click", function () {
+            // 构建 API URL
+            var apiUrl = "/api/fleshWeb";
+
+            // 发起 GET 请求到后台 API
+            fetch(apiUrl, {
+                method: "GET"
+            })
+                .then(function (response) {
+                    if (response.ok) {
+                        console.log("刷新成功");
+                    } else {
+                        console.error("刷新失败");
+                    }
+                })
+                .catch(function (error) {
+                    console.error("刷新失败：" + error.message);
+                });
+        });
+    });
+
+    // 获取刷新按钮元素
+    var flushButton = document.getElementById("flushButton");
+
+    // 点击按钮后执行的函数
+    function handleClick() {
+        // 禁用按钮
+        flushButton.disabled = true;
+        flushButton.textContent = " 刷新中...";
+
+        // 添加加载图标
+        var spinner = document.createElement("span");
+        spinner.className = "spinner-border spinner-border-sm";
+        flushButton.prepend(spinner);
+
+        // 模拟加载过程（假设为10秒）
+        setTimeout(function () {
+            // 恢复按钮状态
+            flushButton.disabled = false;
+            flushButton.textContent = "刷新";
+            location.reload();
+        }, 5000); // 60秒
+
+        // 在这里可以添加刷新页面的逻辑
+    }
+
+    // 添加点击事件监听器
+    flushButton.addEventListener("click", handleClick);
+</script>
+</html>
